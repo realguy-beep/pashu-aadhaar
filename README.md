@@ -1,5 +1,7 @@
 # 🐄 Pashu Aadhaar — nose-print ID for cattle
 
+**Live demo: https://pashu-aadhaar.onrender.com** (free hosting; first load after idle takes ~1 min)
+
 Every cow's muzzle (nose) has a unique pattern of ridges and beads, like a human
 fingerprint. Pashu Aadhaar registers a cow from 2–3 phone photos of its nose and
 later identifies it from a single new photo. No ear tag needed, and no AI training
