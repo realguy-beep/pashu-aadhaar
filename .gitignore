@@ -1,0 +1,7 @@
+# local registry (real farmer data) - the demo registry is demo_db/
+db/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
