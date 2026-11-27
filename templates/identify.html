@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav_identify') }}{% endblock %}
+{% block content %}
+{% if res %}
+  {% if res.match %}{% set m = res.match %}
+  <section class="result good">
+    <p class="result-label">{{ t('match_found') }}</p>
+    <p class="cid">{{ m.id }}</p>
+    {% if m.hidden %}<p class="note">{{ t('match_private') }}</p>{% endif %}
+    <dl class="facts">
+      {% if not m.hidden %}<dt>{{ t('owner') }}</dt><dd><strong>{{ m.owner }}</strong>{% if m.phone %} · {{ m.phone }}{% endif %}</dd>{% endif %}
+      <dt>{{ t('village') }}</dt><dd>{{ m.village or '—' }}</dd>
+      <dt>{{ t('animal') }}</dt><dd>{{ m.species|species }}{% if m.breed %} · {{ m.breed }}{% endif %}</dd>
+      {% if m.tag and not m.hidden %}<dt>{{ t('ear_tag') }}</dt><dd>{{ m.tag }}</dd>{% endif %}
+      <dt>{{ t('insurance') }}</dt><dd><span class="status {{ m.insurance|status }}">{{ m.insurance|insurance }}</span></dd>
+      <dt>{{ t('registered') }}</dt><dd>{{ m.registered_at }}</dd>
+      <dt>{{ t('confidence') }}</dt><dd><strong>{{ m.confidence }}%</strong> · {{ t('ridge_points', n=m.inliers) }}</dd>
+    </dl>
+    {% if visual %}<figure class="visual"><img src="data:image/jpeg;base64,{{ visual }}" alt=""><figcaption>{{ t('visual_caption') }}</figcaption></figure>{% endif %}
+    {% if not m.hidden %}<a class="btn ghost" href="{{ url_for('cow', cid=m.id) }}">{{ t('view_record') }}</a>{% endif %}
+  </section>
+  {% else %}
+  <section class="result bad">
+    <p class="result-label">{{ t('not_registered') }}</p>
+    <p>{{ t('not_registered_body', n=n_total) }}</p>
+    <a class="btn ghost" href="{{ url_for('register') }}">{{ t('register_this') }}</a>
+  </section>
+  {% endif %}
+  {% if res.candidates %}
+  <section class="panel">
+    <h2 class="h3">{{ t('closest') }}</h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>{{ t('pashu_id') }}</th><th>{{ t('owner') }}</th><th class="num">{{ t('points') }}</th><th class="w30">{{ t('score') }}</th></tr></thead>
+      <tbody>
+      {% for c in res.candidates %}
+      <tr>
+        <td>{% if c.hidden %}<code>{{ c.id }}</code>{% else %}<a href="{{ url_for('cow', cid=c.id) }}"><code>{{ c.id }}</code></a>{% endif %}</td>
+        <td>{% if c.hidden %}<span class="muted">{{ t('private') }}</span>{% else %}{{ c.owner }}{% endif %}</td>
+        <td class="num">{{ c.inliers }}</td>
+        <td><span class="scorebar s{{ (c.confidence // 10)|int }}" role="img" aria-label="{{ c.confidence }}%"><i></i></span></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    <p class="muted small">{{ t('match_needs', t=threshold, k=res.query_keypoints) }}</p>
+  </section>
+  {% endif %}
+{% endif %}
+
+<section class="panel">
+  <h1 class="{{ 'h2' if res }}">{{ t('identify_again') if res else t('identify_title') }}</h1>
+  <p class="muted">{{ t('identify_sub', n=n_total) }}</p>
+  {% if n_total == 0 %}
+  <p class="note">{{ t('registry_empty') }} <a href="{{ url_for('register') }}">{{ t('register_one') }}</a></p>
+  {% else %}
+  <form method="post" enctype="multipart/form-data" action="{{ url_for('identify') }}" id="idform">
+    {{ csrf_field() }}
+    <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" class="visually-hidden real" tabindex="-1" aria-hidden="true">
+    <button type="button" class="drop" data-add>
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+      <span>{{ t('take_photo') }}</span>
+    </button>
+    <p class="hint">{{ t('photo_tip') }}</p>
+  </form>
+  {% endif %}
+</section>
+{% endblock %}

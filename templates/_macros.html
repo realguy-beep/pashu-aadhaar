@@ -1,0 +1,12 @@
+{% macro langswitch() %}
+<form method="post" action="{{ url_for('set_lang') }}" class="lang" aria-label="{{ t('language') }}">
+  {{ csrf_field() }}
+  <input type="hidden" name="next" value="{{ here }}">
+  {% for code, name in LANGS.items() %}<button type="submit" name="lang" value="{{ code }}" class="{{ 'on' if code == lang }}" {{ 'aria-current=true' if code == lang }} lang="{{ code }}">{{ name }}</button>{% endfor %}
+</form>
+{% endmacro %}
+{% macro flashes() %}
+{% with msgs = get_flashed_messages(with_categories=true) %}
+  {% for cat, m in msgs %}<div class="flash {{ cat }}" role="{{ 'alert' if cat == 'error' else 'status' }}">{{ m }}</div>{% endfor %}
+{% endwith %}
+{% endmacro %}

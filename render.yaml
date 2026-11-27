@@ -4,8 +4,13 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    # 1 worker so all requests share one in-memory registry; threads for concurrency
     startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 120 --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.7
+      - key: PASHU_SECRET_KEY
+        generateValue: true
+      - key: PASHU_ADMIN_USER
+        sync: false
+      - key: PASHU_ADMIN_PASSWORD
+        sync: false

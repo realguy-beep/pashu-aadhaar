@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#ffffff">
+<title>{% block title %}{% endblock %} · {{ t('app_name') }}</title>
+<link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+<link rel="stylesheet" href="{{ asset('cropper.min.css') }}">
+<link rel="stylesheet" href="{{ asset('style.css') }}">
+</head>
+<body class="{% block bodyclass %}{% endblock %}" data-i18n='{{ js_strings|tojson }}'>
+{% block shell %}
+{% from "_macros.html" import langswitch, flashes with context %}
+<header class="bar">
+  <div class="bar-in">
+    <a class="wordmark" href="{{ url_for('identify') }}">{{ t('app_name') }}</a>
+    {% if me %}
+    <nav class="nav" aria-label="Main">
+      <a href="{{ url_for('identify') }}" {{ 'aria-current=page' if tab == 'identify' }}>{{ t('nav_identify') }}</a>
+      <a href="{{ url_for('register') }}" {{ 'aria-current=page' if tab == 'register' }}>{{ t('nav_register') }}</a>
+      <a href="{{ url_for('cows') }}" {{ 'aria-current=page' if tab == 'cows' }}>{{ t('nav_registry') if is_admin else t('nav_my_animals') }} <span class="count">{{ n_mine }}</span></a>
+      {% if is_admin %}<a href="{{ url_for('admin') }}" {{ 'aria-current=page' if tab == 'admin' }}>{{ t('nav_admin') }}</a>{% endif %}
+    </nav>
+    {% endif %}
+    <div class="bar-end">
+      {% if not hide_lang %}{{ langswitch() }}{% endif %}
+      {% if me %}
+      <a class="me" href="{{ url_for('account') }}" {{ 'aria-current=page' if tab == 'account' }} title="{{ t('nav_account') }}">
+        {% if me.avatar %}<img src="{{ url_for('avatar', uid=me.id) }}" alt="">{% else %}<span class="initial" aria-hidden="true">{{ me.full_name[:1]|upper }}</span>{% endif %}
+        <span class="me-name">{{ me.full_name }}</span>
+      </a>
+      <form method="post" action="{{ url_for('logout') }}" class="signout">{{ csrf_field() }}<button class="link" type="submit">{{ t('sign_out') }}</button></form>
+      {% endif %}
+    </div>
+  </div>
+</header>
+<main class="page">
+  {{ flashes() }}
+  {% block content %}{% endblock %}
+</main>
+<footer class="foot">{{ t('footer') }}</footer>
+{% endblock %}
+
+<div id="cropdlg" role="dialog" aria-modal="true" aria-labelledby="croptitle">
+  <div class="hd" id="croptitle">{{ t('crop_title') }}</div>
+  <div class="bd"><img id="cropimg" alt=""></div>
+  <div class="ft">
+    <button type="button" class="btn quiet" id="cropcancel">{{ t('cancel') }}</button>
+    <button type="button" class="btn quiet" id="croprot">{{ t('rotate') }}</button>
+    <button type="button" class="btn" id="cropok">{{ t('use_photo') }}</button>
+  </div>
+</div>
+<div id="busy" aria-live="polite"><div class="spin"></div><span id="busytxt"></span></div>
+<script src="{{ asset('cropper.min.js') }}"></script>
+<script src="{{ asset('app.js') }}"></script>
+</body>
+</html>

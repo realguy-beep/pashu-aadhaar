@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav_register') }}{% endblock %}
+{% block content %}
+{% if done %}
+<section class="result good">
+  <h1 class="result-label">{{ t('registered_ok') }}</h1>
+  <p class="cid">{{ done.id }}</p>
+  <p>{{ done.owner }}{% if done.village %} · {{ done.village }}{% endif %}. {{ t('registered_body', n=done.photos) }}</p>
+  {% if rejected %}<p class="note">{{ t('skipped') }}: {{ rejected }}</p>{% endif %}
+  <div class="actions">
+    <a class="btn" href="{{ url_for('register') }}">{{ t('register_another') }}</a>
+    <a class="btn ghost" href="{{ url_for('cow', cid=done.id) }}">{{ t('view_record') }}</a>
+  </div>
+</section>
+{% else %}
+{% if dup %}
+<section class="result bad">
+  <p class="result-label">{{ t('already_registered') }}</p>
+  <p>{{ t('dup_body', n=dup.inliers) }}</p>
+  {% if dup.hidden %}<p class="note">{{ t('dup_other_help') }}</p>{% endif %}
+  <dl class="facts">
+    <dt>{{ t('pashu_id') }}</dt><dd>{% if dup.hidden %}<code>{{ dup.id }}</code>{% else %}<a href="{{ url_for('cow', cid=dup.id) }}"><code>{{ dup.id }}</code></a>{% endif %}</dd>
+    <dt>{{ t('owner') }}</dt><dd>{{ t('other_account') if dup.hidden else dup.owner }}</dd>
+    {% if dup.village %}<dt>{{ t('village') }}</dt><dd>{{ dup.village }}</dd>{% endif %}
+  </dl>
+</section>
+{% endif %}
+<section class="panel">
+  <h1>{{ t('register_title') }}</h1>
+  <form method="post" enctype="multipart/form-data" action="{{ url_for('register') }}" id="regform" class="stack">
+    {{ csrf_field() }}
+    <fieldset>
+      <legend>{{ t('nose_photos') }}</legend>
+      <input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple class="visually-hidden real" tabindex="-1" aria-hidden="true">
+      <div class="shots"><button type="button" class="add" data-add><span aria-hidden="true">+</span>{{ t('add_photo') }}</button></div>
+      <p class="hint">{{ t('reg_tip') }}</p>
+    </fieldset>
+    <fieldset>
+      <legend>{{ t('animal_details') }}</legend>
+      <div class="row">
+        <div><label for="owner">{{ t('owner_name') }}</label>
+          <input id="owner" type="text" name="owner" required maxlength="120" value="{{ form.owner or '' }}"></div>
+        <div><label for="phone">{{ t('mobile') }}</label>
+          <input id="phone" type="tel" name="phone" maxlength="16" inputmode="tel" value="{{ form.phone or '' }}"></div>
+        <div><label for="village">{{ t('village') }}</label>
+          <input id="village" type="text" name="village" maxlength="120" value="{{ form.village or '' }}"></div>
+        <div><label for="species">{{ t('animal') }}</label>
+          <select id="species" name="species">{% for o in species_opts %}<option value="{{ o }}" {{ 'selected' if form.species == o }}>{{ o|species }}</option>{% endfor %}</select></div>
+        <div><label for="breed">{{ t('breed') }}</label>
+          <input id="breed" type="text" name="breed" maxlength="120" placeholder="Gir, Sahiwal, Murrah, HF cross" value="{{ form.breed or '' }}"></div>
+        <div><label for="tag">{{ t('ear_tag_opt') }}</label>
+          <input id="tag" type="text" name="tag" maxlength="120" value="{{ form.tag or '' }}"></div>
+        <div><label for="insurance">{{ t('insurance_status') }}</label>
+          <select id="insurance" name="insurance">{% for o in insurance_opts %}<option value="{{ o }}" {{ 'selected' if form.insurance == o }}>{{ o|insurance }}</option>{% endfor %}</select></div>
+      </div>
+    </fieldset>
+    <button type="submit" class="btn" id="regbtn" disabled>{{ t('register_btn') }}</button>
+  </form>
+</section>
+{% endif %}
+{% endblock %}

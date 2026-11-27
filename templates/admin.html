@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav_admin') }}{% endblock %}
+{% block content %}
+{% if issued %}
+<section class="result good" role="status">
+  <p class="result-label">{{ t('admin_code_title', u=issued.username) }}</p>
+  <p class="cid" id="admincode">{{ issued.code }}</p>
+  <p class="nomargin">{{ t('admin_code_note') }}</p>
+  <div class="actions"><button type="button" class="btn ghost" data-copy="admincode">{{ t('copy') }}</button></div>
+</section>
+{% endif %}
+<h1>{{ t('users') }}</h1>
+{% if unowned %}<p class="muted">{{ t('unowned_note', n=unowned) }}</p>{% endif %}
+<div class="panel flush"><div class="tablewrap"><table class="list">
+  <thead><tr><th><span class="visually-hidden">Photo</span></th><th>{{ t('col_user') }}</th><th>{{ t('col_contact') }}</th><th class="num">{{ t('col_animals') }}</th><th>{{ t('col_role') }}</th><th>{{ t('col_status') }}</th><th>{{ t('col_last') }}</th><th></th></tr></thead>
+  <tbody>
+  {% for u in users %}
+  <tr>
+    <td>{% if u.avatar %}<img class="thumb round" src="{{ url_for('avatar', uid=u.id) }}" alt="" loading="lazy" width="36" height="36">{% else %}<span class="thumb round initial" aria-hidden="true">{{ u.full_name[:1]|upper }}</span>{% endif %}</td>
+    <td><strong>{{ u.full_name }}</strong><br><small class="muted">@{{ u.username }}</small></td>
+    <td><span class="nowrap">{{ u.phone or "—" }}</span><br><small class="muted">{{ u.village }}</small></td>
+    <td class="num">{{ counts.get(u.id, 0) }}</td>
+    <td>{{ t('role_admin') if u.role == 'admin' else t('role_user') }}</td>
+    <td><span class="status {{ 'good' if u.active else 'bad' }}">{{ t('active') if u.active else t('disabled') }}</span></td>
+    <td><small>{{ u.last_login or t('never') }}</small></td>
+    <td class="nowrap">{% if u.id != me.id %}
+      <form method="post" action="{{ url_for('admin_user', uid=u.id, action='toggle') }}" class="inline" data-confirm="{{ t('confirm_toggle', u=u.username) }}">
+        {{ csrf_field() }}<button class="link" type="submit">{{ t('disable') if u.active else t('enable') }}</button></form>
+      <form method="post" action="{{ url_for('admin_user', uid=u.id, action='role') }}" class="inline" data-confirm="{{ t('confirm_role', u=u.username) }}">
+        {{ csrf_field() }}<button class="link" type="submit">{{ t('make_user') if u.role == 'admin' else t('make_admin') }}</button></form>
+      <form method="post" action="{{ url_for('admin_user', uid=u.id, action='reset') }}" class="inline" data-confirm="{{ t('confirm_reset', u=u.username) }}">
+        {{ csrf_field() }}<button class="link" type="submit">{{ t('reset_user') }}</button></form>
+    {% else %}<small class="muted">{{ t('you') }}</small>{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table></div></div>
+
+<h2>{{ t('activity') }}</h2>
+<p class="muted">{{ t('activity_sub') }}</p>
+<div class="panel flush"><div class="tablewrap"><table class="list log">
+  <thead><tr><th>{{ t('col_time') }}</th><th>{{ t('col_user') }}</th><th>{{ t('col_ip') }}</th><th>{{ t('col_event') }}</th><th>{{ t('col_detail') }}</th></tr></thead>
+  <tbody>
+  {% for l in logs %}
+  <tr class="{{ 'flag' if 'fail' in l.action or 'blocked' in l.action }}">
+    <td class="nowrap"><small>{{ l.at }}</small></td><td>{{ l.username or '—' }}</td><td><small>{{ l.ip }}</small></td>
+    <td><code>{{ l.action }}</code></td><td><small>{{ l.detail }}</small></td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table></div></div>
+{% endblock %}

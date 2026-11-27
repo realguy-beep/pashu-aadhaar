@@ -1,19 +1,3 @@
-"""
-Measure Pashu Aadhaar accuracy on a muzzle dataset.
-
-Dataset layout (same as the public Zenodo beef-cattle muzzle dataset):
-    dataset_root/
-        cow_001/  img1.jpg img2.jpg ...
-        cow_002/  ...
-
-For each cow: the first --enroll photos are registered, the rest are used as
-test queries. Also tests "unknown cows" (cows never registered) to measure
-false matches.
-
-Usage:
-    python evaluate.py path/to/BeefCattle_Muzzle_database --cows 60
-"""
-
 import argparse
 import os
 import random
@@ -27,7 +11,7 @@ EXT = (".jpg", ".jpeg", ".png", ".bmp")
 
 
 def main():
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description="Measure Pashu Aadhaar accuracy on a muzzle dataset.")
     ap.add_argument("root")
     ap.add_argument("--cows", type=int, default=50, help="cows to register (more = slower)")
     ap.add_argument("--unknown", type=int, default=20, help="extra cows kept unregistered")
@@ -54,10 +38,9 @@ def main():
     print(f"Found {len(folders)} usable cows. Registering {len(known)}, "
           f"keeping {len(unknown)} as unknown.")
 
-    # --- enrol gallery (in memory)
     t0 = time.time()
     gallery = pc.GalleryIndex()
-    tests = []    # (true_cow or None, path)
+    tests = []
     for cow, imgs in known:
         random.shuffle(imgs)
         for i, p in enumerate(imgs[:a.enroll]):
@@ -72,8 +55,7 @@ def main():
     print(f"Enrolled {len(gallery.items)} photos in {time.time() - t0:.1f}s. "
           f"Running {len(tests)} queries...")
 
-    # --- query
-    genuine, impostor = [], []      # best score when correct / best wrong score
+    genuine, impostor = [], []
     rows = []
     t0 = time.time()
     retakes = 0
@@ -81,7 +63,7 @@ def main():
         img = pc.load_image(p)
         q = pc.extract(img)[:2]
         if a.quality and pc.check_quality(img, len(q[1])):
-            retakes += 1   # the app would ask the user to retake this photo
+            retakes += 1
             continue
         best = {label: s for s, label, _ in gallery.search(q)}
         ranked = sorted(best.items(), key=lambda x: -x[1]) or [(None, 0)]

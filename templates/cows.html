@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav_registry') if is_admin else t('nav_my_animals') }}{% endblock %}
+{% block content %}
+<div class="pagehead">
+  <h1>{{ t('all_animals') if is_admin else t('my_animals_title') }}</h1>
+  <form method="get" action="{{ url_for('cows') }}" class="search" role="search">
+    <input type="search" name="q" value="{{ q }}" placeholder="{{ t('search_ph') }}" maxlength="60" aria-label="{{ t('search') }}">
+    <button type="submit" class="btn ghost">{{ t('search') }}</button>
+  </form>
+</div>
+<dl class="stats">
+  <div><dt>{{ t('stat_animals') }}</dt><dd>{{ cows|length }}</dd></div>
+  <div><dt>{{ t('stat_photos') }}</dt><dd>{{ photos }}</dd></div>
+  <div><dt>{{ t('stat_insured') }}</dt><dd>{{ insured }}</dd></div>
+</dl>
+{% if cows %}
+<div class="panel flush"><div class="tablewrap"><table class="list">
+  <thead><tr><th><span class="visually-hidden">Photo</span></th><th>{{ t('pashu_id') }}</th><th>{{ t('owner') }}</th><th>{{ t('village') }}</th><th>{{ t('animal') }}</th><th>{{ t('insurance') }}</th></tr></thead>
+  <tbody>
+  {% for c in cows %}
+  <tr data-href="{{ url_for('cow', cid=c.id) }}">
+    <td>{% if c.photos %}<img class="thumb" src="{{ url_for('photo', cid=c.id, i=0) }}" alt="" loading="lazy" width="44" height="44">{% endif %}</td>
+    <td><a href="{{ url_for('cow', cid=c.id) }}"><code>{{ c.id }}</code></a></td>
+    <td>{{ c.owner }}</td><td>{{ c.village or '—' }}</td>
+    <td>{{ c.species|species }}{% if c.breed %} · {{ c.breed }}{% endif %}</td>
+    <td><span class="status {{ c.insurance|status }}">{{ c.insurance|insurance }}</span></td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table></div></div>
+{% elif q %}
+<p class="empty">{{ t('no_match_q', q=q) }} <a href="{{ url_for('cows') }}">{{ t('clear_search') }}</a></p>
+{% else %}
+<p class="empty">{{ t('none_yet') }} <a href="{{ url_for('register') }}">{{ t('register_one') }}</a></p>
+{% endif %}
+{% endblock %}

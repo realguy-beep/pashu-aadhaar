@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ cow.id }}{% endblock %}
+{% block content %}
+<p class="crumb"><a href="{{ url_for('cows') }}">&larr; {{ t('back') }}</a></p>
+<section class="panel">
+  <p class="muted small nomargin">{{ t('pashu_id') }}</p>
+  <h1 class="cid">{{ cow.id }}</h1>
+  <dl class="facts">
+    <dt>{{ t('owner') }}</dt><dd><strong>{{ cow.owner }}</strong></dd>
+    {% if cow.phone %}<dt>{{ t('mobile') }}</dt><dd>{{ cow.phone }}</dd>{% endif %}
+    <dt>{{ t('village') }}</dt><dd>{{ cow.village or '—' }}</dd>
+    <dt>{{ t('animal') }}</dt><dd>{{ cow.species|species }}{% if cow.breed %} · {{ cow.breed }}{% endif %}</dd>
+    {% if cow.tag %}<dt>{{ t('ear_tag') }}</dt><dd>{{ cow.tag }}</dd>{% endif %}
+    <dt>{{ t('insurance') }}</dt><dd><span class="status {{ cow.insurance|status }}">{{ cow.insurance|insurance }}</span></dd>
+    <dt>{{ t('owner_account') }}</dt><dd>{% if owner %}{{ owner.full_name }} <span class="muted">@{{ owner.username }}</span>{% else %}<span class="muted">{{ t('no_account') }}</span>{% endif %}</dd>
+    <dt>{{ t('registered') }}</dt><dd>{{ cow.registered_at }}{% if cow.registered_by %} {{ t('registered_by', u=cow.registered_by) }}{% endif %}</dd>
+  </dl>
+  <h2 class="h3">{{ t('nose_prints') }}</h2>
+  <div class="photos">{% for i in range(cow.photos or 0) %}<img src="{{ url_for('photo', cid=cow.id, i=i) }}" alt="{{ t('nose_prints') }} {{ i + 1 }}" width="150" height="150">{% endfor %}</div>
+  {% if is_admin and users %}
+  <form method="post" action="{{ url_for('transfer', cid=cow.id) }}" class="inline-form transfer" data-confirm="{{ t('confirm_transfer', id=cow.id) }}">
+    {{ csrf_field() }}
+    <div>
+      <label for="transfer-user">{{ t('transfer_label') }}</label>
+      <select id="transfer-user" name="user_id">{% for u in users %}<option value="{{ u.id }}" {{ 'selected' if owner and owner.id == u.id }}>{{ u.full_name }} (@{{ u.username }})</option>{% endfor %}</select>
+    </div>
+    <button type="submit" class="btn ghost">{{ t('transfer') }}</button>
+  </form>
+  {% endif %}
+  <form method="post" action="{{ url_for('delete', cid=cow.id) }}" data-confirm="{{ t('delete_confirm', id=cow.id) }}" class="danger-zone">
+    {{ csrf_field() }}
+    <button class="btn danger" type="submit">{{ t('delete_record') }}</button>
+  </form>
+</section>
+{% endblock %}

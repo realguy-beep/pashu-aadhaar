@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ t('create_account') }}{% endblock %}
+{% block bodyclass %}auth{% endblock %}
+{% block shell %}
+{% from "_macros.html" import langswitch, flashes with context %}
+<div class="auth-top">{{ langswitch() }}</div>
+<main class="auth">
+  <p class="wordmark">{{ t('app_name') }}</p>
+  <h1>{{ t('create_account') }}</h1>
+  <p class="lede">{{ t('signup_sub') }}</p>
+  {% if setup %}<div class="flash warn">{{ t('setup_note') }}</div>{% endif %}
+  {{ flashes() }}
+  <form method="post" action="{{ url_for('signup') }}" enctype="multipart/form-data" class="stack">
+    {{ csrf_field() }}
+    {% if setup %}<input type="hidden" name="setup" value="{{ setup }}">{% endif %}
+    <div class="avatar-pick">
+      <label class="avatar-drop" for="avatar"><img id="avatarprev" alt="" hidden><span aria-hidden="true">{{ form.full_name[:1]|upper if form.full_name else '+' }}</span></label>
+      <div>
+        <label for="avatar" class="link-label">{{ t('profile_photo') }}</label>
+        <small class="muted">{{ t('optional_img') }}</small>
+      </div>
+      <input id="avatar" type="file" name="avatar" accept="image/jpeg,image/png,image/webp" class="visually-hidden" data-preview="avatarprev">
+    </div>
+    <label for="full_name">{{ t('full_name') }}</label>
+    <input id="full_name" type="text" name="full_name" required maxlength="60" autocomplete="name" value="{{ form.full_name or '' }}">
+    <div class="row">
+      <div><label for="phone">{{ t('mobile') }}</label>
+        <input id="phone" type="tel" name="phone" maxlength="16" autocomplete="tel" inputmode="tel" value="{{ form.phone or '' }}"></div>
+      <div><label for="village">{{ t('village') }}</label>
+        <input id="village" type="text" name="village" maxlength="60" value="{{ form.village or '' }}"></div>
+    </div>
+    <label for="username">{{ t('username') }}</label>
+    <input id="username" type="text" name="username" required minlength="3" maxlength="32" autocomplete="username" autocapitalize="none" spellcheck="false" value="{{ form.username or '' }}">
+    <label for="password">{{ t('password') }}</label>
+    <div class="pw">
+      <input id="password" type="password" name="password" required minlength="10" maxlength="128" autocomplete="new-password" data-strength="pwmeter" aria-describedby="pwmeter">
+      <button type="button" class="link" data-reveal="password">{{ t('show') }}</button>
+    </div>
+    <div class="meter" id="pwmeter"><i></i><span>{{ t('pw_hint') }}</span></div>
+    <label for="password2">{{ t('repeat_password') }}</label>
+    <input id="password2" type="password" name="password2" required minlength="10" maxlength="128" autocomplete="new-password">
+    <button type="submit" class="btn wide">{{ t('create_account') }}</button>
+  </form>
+  <p class="alt">{{ t('have_account') }} <a href="{{ url_for('login') }}">{{ t('sign_in') }}</a></p>
+</main>
+{% endblock %}

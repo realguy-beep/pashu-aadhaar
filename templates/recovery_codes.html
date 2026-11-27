@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ t('codes_title') }}{% endblock %}
+{% block bodyclass %}{{ '' if me else 'auth' }}{% endblock %}
+{% macro codes_block() %}
+<h1>{{ t('codes_title') }}</h1>
+<p class="lede">{{ t('codes_sub') }}</p>
+<div class="codes-box">
+  <p class="muted small nomargin">{{ t('codes_for', u=username) }}</p>
+  <ol class="codes" id="codes">{% for c in codes %}<li><code>{{ c }}</code></li>{% endfor %}</ol>
+  <div class="actions">
+    <button type="button" class="btn ghost" data-copy="codes">{{ t('copy') }}</button>
+    <button type="button" class="btn ghost" data-download="codes" data-filename="pashu-aadhaar-recovery-{{ username }}.txt">{{ t('download') }}</button>
+  </div>
+</div>
+<a class="btn" href="{{ url_for('account') if me else url_for('login') }}">{{ t('codes_continue') }}</a>
+{% endmacro %}
+{% block shell %}
+{% if me %}{{ super() }}{% else %}
+<main class="auth">
+  <p class="wordmark">{{ t('app_name') }}</p>
+  {{ codes_block() }}
+</main>
+{% endif %}
+{% endblock %}
+{% block content %}
+<section class="panel narrow">{{ codes_block() }}</section>
+{% endblock %}

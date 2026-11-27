@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ t('forgot_title') }}{% endblock %}
+{% block bodyclass %}auth{% endblock %}
+{% block shell %}
+{% from "_macros.html" import langswitch, flashes with context %}
+<div class="auth-top">{{ langswitch() }}</div>
+<main class="auth">
+  <p class="wordmark">{{ t('app_name') }}</p>
+  <h1>{{ t('forgot_title') }}</h1>
+  <p class="lede">{{ t('forgot_sub') }}</p>
+  {{ flashes() }}
+  <form method="post" action="{{ url_for('forgot') }}" class="stack" autocomplete="off">
+    {{ csrf_field() }}
+    <label for="username">{{ t('username') }}</label>
+    <input id="username" type="text" name="username" required maxlength="32" autocomplete="username" autocapitalize="none" spellcheck="false" value="{{ username }}" autofocus>
+    <label for="code">{{ t('reset_code') }}</label>
+    <input id="code" type="text" name="code" required maxlength="40" autocapitalize="characters" spellcheck="false" placeholder="XXXXX-XXXXX" class="mono">
+    <label for="password">{{ t('new_password') }}</label>
+    <div class="pw">
+      <input id="password" type="password" name="password" required minlength="10" maxlength="128" autocomplete="new-password" data-strength="pwmeter" aria-describedby="pwmeter">
+      <button type="button" class="link" data-reveal="password">{{ t('show') }}</button>
+    </div>
+    <div class="meter" id="pwmeter"><i></i><span>{{ t('pw_hint') }}</span></div>
+    <label for="password2">{{ t('repeat_new') }}</label>
+    <input id="password2" type="password" name="password2" required minlength="10" maxlength="128" autocomplete="new-password">
+    <button type="submit" class="btn wide">{{ t('reset_btn') }}</button>
+  </form>
+  <p class="hint">{{ t('no_codes_help') }}</p>
+  <p class="alt"><a href="{{ url_for('login') }}">{{ t('back_to_signin') }}</a></p>
+</main>
+{% endblock %}

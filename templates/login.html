@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ t('sign_in') }}{% endblock %}
+{% block bodyclass %}auth{% endblock %}
+{% block shell %}
+{% from "_macros.html" import langswitch, flashes with context %}
+<div class="auth-top">{{ langswitch() }}</div>
+<main class="auth">
+  <p class="wordmark">{{ t('app_name') }}</p>
+  <h1>{{ t('sign_in') }}</h1>
+  <p class="lede">{{ t('sign_in_sub') }}</p>
+  {{ flashes() }}
+  <form method="post" action="{{ url_for('login') }}" class="stack">
+    {{ csrf_field() }}
+    <input type="hidden" name="next" value="{{ next }}">
+    <label for="username">{{ t('username') }}</label>
+    <input id="username" type="text" name="username" required maxlength="32" autocomplete="username" autocapitalize="none" spellcheck="false" value="{{ username or '' }}" autofocus>
+    <label for="password">{{ t('password') }}</label>
+    <div class="pw">
+      <input id="password" type="password" name="password" required maxlength="128" autocomplete="current-password">
+      <button type="button" class="link" data-reveal="password">{{ t('show') }}</button>
+    </div>
+    <p class="forgot"><a href="{{ url_for('forgot') }}">{{ t('forgot_link') }}</a></p>
+    <button type="submit" class="btn wide">{{ t('sign_in') }}</button>
+  </form>
+  <p class="alt">{{ t('new_here') }} <a href="{{ url_for('signup') }}">{{ t('create_account') }}</a></p>
+</main>
+{% endblock %}

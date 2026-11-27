@@ -1,19 +1,3 @@
-"""
-Build the demo registry from the public Zenodo muzzle dataset.
-
-    python seed_demo.py path/to/BeefCattle_Muzzle_Individualized
-
-Creates:
-  demo_db/        20 registered cows with sample Indian owner details (fictional)
-  demo_photos/    unseen photos to try in the Identify tab:
-                    registered/   new photos of registered cows   -> should match
-                    unregistered/ cows that were never registered -> "Not registered"
-                    duplicate/    cow 4454 = same animal as registered cow 4451 in
-                                  the dataset (labelling error)   -> "Already registered"
-
-Dataset: "Beef Cattle Muzzle/Noseprint database", Zenodo record 6324361, CC-BY 4.0.
-"""
-
 import os
 import random
 import shutil
@@ -58,7 +42,7 @@ def main(root):
     for sub in ("registered", "unregistered", "duplicate"):
         os.makedirs(os.path.join(out, sub))
 
-    skip = {"cattle_4451", "cattle_4454", "cattle_5407", "cattle_6011"}  # mislabelled pairs
+    skip = {"cattle_4451", "cattle_4454", "cattle_5407", "cattle_6011"}
     cows = sorted(c for c in os.listdir(root) if c not in skip and len(photos(root, c)) >= 6)
     random.shuffle(cows)
     candidates = ["cattle_4451"] + cows
@@ -68,10 +52,10 @@ def main(root):
         ps = photos(root, cow)
         random.shuffle(ps)
         info = dict(owner=OWNERS[k], phone="", village=VILLAGES[k % len(VILLAGES)],
-                    species="Cow · गाय", breed=BREEDS[k % len(BREEDS)], tag="",
+                    species="Cow", breed=BREEDS[k % len(BREEDS)], tag="",
                     insurance=INSURANCE[k % len(INSURANCE)], source=cow)
         enrolled, used = [], 0
-        for p in ps:                       # first 3 photos that pass the quality check
+        for p in ps:
             if len(enrolled) == 3:
                 break
             used += 1
@@ -79,9 +63,9 @@ def main(root):
             if not pc.check_quality(img, len(pc.extract(img)[1])):
                 enrolled.append(img)
         if len(enrolled) < 3:
-            continue                       # not enough sharp photos of this cow
+            continue
         cid, _ = reg.enroll(enrolled, info)
-        for j, p in enumerate(ps[used:used + 2]):   # unseen photos for the demo
+        for j, p in enumerate(ps[used:used + 2]):
             cv2.imwrite(os.path.join(out, "registered", f"{cid}_{OWNERS[k].split()[0]}_{j + 1}.jpg"),
                         small(p, 800))
         print(f"{cid}  {OWNERS[k]:<18} {cow}")
@@ -97,5 +81,5 @@ def main(root):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        sys.exit(__doc__)
+        sys.exit("Usage: python seed_demo.py path/to/BeefCattle_Muzzle_Individualized")
     main(sys.argv[1])
