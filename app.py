@@ -1090,8 +1090,10 @@ def bootstrap_admin():
 
 bootstrap_admin()
 if SETUP_TOKEN:
-    print("\n  No administrator yet. Create one by opening:")
-    print(f"  http://localhost:5000/signup?setup={SETUP_TOKEN}")
+    print("\n  No administrator yet. Create one by opening this address on your site:")
+    print(f"  /signup?setup={SETUP_TOKEN}")
+    print(f"  On this computer: http://localhost:5000/signup?setup={SETUP_TOKEN}")
+    print("  On Render: https://<your-app>.onrender.com/signup?setup=<the same code>")
     print("  (or run: python app.py create-admin)\n", flush=True)
 
 
